@@ -1,0 +1,75 @@
+# =========================
+# GENERAL / IDE
+# =========================
+.DS_Store
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# =========================
+# BACKEND (.NET 9 / ASP.NET)
+# =========================
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Config & Secrets (Quan trọng: Không bao giờ commit file chứa mật khẩu/key)
+appsettings.Development.json
+appsettings.Local.json
+appsettings.json
+secrets.json
+
+# Logs
+*.log
+
+# Unit Test results
+TestResults/
+
+# =========================
+# FRONTEND (NodeJS / React / Antd)
+# =========================
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production Build
+dist/
+build/
+
+# Testing
+coverage/
+
+# Environment Variables (Quan trọng: chứa API Key, config riêng)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Typescript
+*.tsbuildinfo
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
