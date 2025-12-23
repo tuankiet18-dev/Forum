@@ -47,6 +47,19 @@ services:
     volumes:
       - ./frontend:/app  
       - /app/node_modules
-
+      
+  ai:
+    build: ./AI
+    container_name: mathforum_ai
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./AI:/app # Mount code để sửa code AI cũng tự cập nhật (Hot Reload)
+      # Nếu AI cần dùng GPU, cấu hình thêm ở đây (nhưng start cơ bản thì chưa cần)
+    networks:
+      - default
+    # Nếu AI cần gọi Database, thêm biến môi trường vào đây
+    # environment: 
+    #   - DB_CONNECTION=...
 volumes:
   postgres_data:
