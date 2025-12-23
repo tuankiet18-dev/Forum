@@ -24,10 +24,8 @@
 *.userosscache
 *.sln.docstates
 
-# Config & Secrets (Quan trọng: Không bao giờ commit file chứa mật khẩu/key)
 appsettings.Development.json
 appsettings.Local.json
-appsettings.json
 secrets.json
 
 # Logs
@@ -51,8 +49,6 @@ build/
 # Testing
 coverage/
 
-# Environment Variables (Quan trọng: chứa API Key, config riêng)
-.env
 .env.local
 .env.development.local
 .env.test.local
