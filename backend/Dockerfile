@@ -1,4 +1,4 @@
-# Backend/Dockerfile
+# Sử dụng .NET 9 SDK
 FROM mcr.microsoft.com/dotnet/sdk:9.0
 
 WORKDIR /app
@@ -7,11 +7,11 @@ WORKDIR /app
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copy toàn bộ source code vào
+# Copy toàn bộ source code
 COPY . .
 
-# Mở port 8080 (mặc định của .NET 8/9 container)
+# Mở port 8080 (Port mặc định của container .NET 8+)
 EXPOSE 8080
 
-# Lệnh chạy server với chế độ Hot Reload
-ENTRYPOINT ["dotnet", "watch", "run", "--urls", "http://+:8080"]
+# Chạy lệnh watch để tự động reload khi sửa code
+ENTRYPOINT ["dotnet", "watch", "run", "--non-interactive", "--urls", "http://+:8080"]

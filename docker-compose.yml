@@ -1,51 +1,53 @@
 services:
-  # 1. Database
+  # 1. Database PostgreSQL
   db:
     image: postgres:15-alpine
     container_name: mathforum_db
+    restart: always
     environment:
-      - POSTGRES_USER=${DB_USER}      # <-- Đọc từ .env
-      - POSTGRES_PASSWORD=${DB_PASSWORD} # <-- Đọc từ .env
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
     ports:
-      - "${DB_PORT}:5432"
+      - "${DB_PORT}:5432" # Map port ra máy thật để dùng DBeaver/PgAdmin
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # 2. Backend
+  # 2. Backend .NET 9
   backend:
     build: ./backend
     container_name: mathforum_backend
     ports:
-      - "${BACKEND_PORT}:8080" # Map port từ .env
+      - "${BACKEND_LOCAL_PORT}:8080" # Map port 5293 -> 8080
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      # Connection String dùng biến từ .env
+      # QUAN TRỌNG: Override connection string để trỏ vào service 'db'
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD};
+      # Cấu hình JWT
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
     depends_on:
       - db
     volumes:
-      - ./backend:/app
-      - /app/bin
-      - /app/obj
+      - ./backend:/app      # Mount code để Hot Reload hoạt động
+      - /app/bin            # Loại trừ folder bin khỏi mount để tránh conflict
+      - /app/obj            # Loại trừ folder obj
 
-  # 3. Frontend
+  # 3. Frontend React Vite
   frontend:
     build: ./frontend
     container_name: mathforum_frontend
     ports:
-      - "${FRONTEND_PORT}:5173"
+      - "${FRONTEND_LOCAL_PORT}:5173"
     environment:
-      # Vite cần biết Backend đang chạy ở port nào trên máy host
-      - VITE_API_URL=http://localhost:${BACKEND_PORT}/api
+      # Vite cần biết API ở đâu để gọi (qua trình duyệt máy host)
+      - VITE_API_URL=http://localhost:${BACKEND_LOCAL_PORT}/api
     depends_on:
       - backend
     volumes:
-      - ./frontend:/app
-      - /app/node_modules
+      - ./frontend:/app           # Mount code để Hot Reload hoạt động
+      - /app/node_modules         # Giữ node_modules riêng của container
 
 volumes:
   postgres_data:

@@ -1,8 +1,0 @@
-# .dockerignore
-**/.git
-**/.vs
-**/bin
-**/obj
-**/node_modules
-**/dist
-**/build
