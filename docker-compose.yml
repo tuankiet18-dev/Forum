@@ -1,0 +1,51 @@
+services:
+  # 1. Database
+  db:
+    image: postgres:15-alpine
+    container_name: mathforum_db
+    environment:
+      - POSTGRES_USER=${DB_USER}      # <-- Đọc từ .env
+      - POSTGRES_PASSWORD=${DB_PASSWORD} # <-- Đọc từ .env
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Backend
+  backend:
+    build: ./backend
+    container_name: mathforum_backend
+    ports:
+      - "${BACKEND_PORT}:8080" # Map port từ .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Connection String dùng biến từ .env
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD};
+      - Jwt__Key=${JWT_KEY}
+      - Jwt__Issuer=${JWT_ISSUER}
+      - Jwt__Audience=${JWT_AUDIENCE}
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+      - /app/bin
+      - /app/obj
+
+  # 3. Frontend
+  frontend:
+    build: ./frontend
+    container_name: mathforum_frontend
+    ports:
+      - "${FRONTEND_PORT}:5173"
+    environment:
+      # Vite cần biết Backend đang chạy ở port nào trên máy host
+      - VITE_API_URL=http://localhost:${BACKEND_PORT}/api
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
