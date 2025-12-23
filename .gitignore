@@ -73,3 +73,6 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+AI/venv/
+AI/__pycache__
