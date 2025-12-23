@@ -1,21 +1,17 @@
-import { Button, DatePicker, Space, message } from 'antd';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Home from './pages/Home';
 
 function App() {
-  const handleClick = () => {
-    message.success('Đã kết nối thành công!');
-    // Thử gọi API .NET ở đây sau này
-  };
-
   return (
-    <div style={{ padding: 50 }}>
-      <Space direction="vertical">
-        <h1>Frontend: React + Ant Design</h1>
-        <DatePicker />
-        <Button type="primary" onClick={handleClick}>
-          Test Ant Design Button
-        </Button>
-      </Space>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
