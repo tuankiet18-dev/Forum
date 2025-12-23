@@ -9,7 +9,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
     ports:
-      - "${DB_PORT}:5432" # Map port ra máy thật để dùng DBeaver/PgAdmin
+      - "${DB_PORT}:5432" 
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -21,18 +21,18 @@ services:
       - "${BACKEND_LOCAL_PORT}:8080" # Map port 5293 -> 8080
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      # QUAN TRỌNG: Override connection string để trỏ vào service 'db'
+     
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD};
-      # Cấu hình JWT
+  
       - Jwt__Key=${JWT_KEY}
       - Jwt__Issuer=${JWT_ISSUER}
       - Jwt__Audience=${JWT_AUDIENCE}
     depends_on:
       - db
     volumes:
-      - ./backend:/app      # Mount code để Hot Reload hoạt động
-      - /app/bin            # Loại trừ folder bin khỏi mount để tránh conflict
-      - /app/obj            # Loại trừ folder obj
+      - ./backend:/app
+      - /app/bin
+      - /app/obj
 
   # 3. Frontend React Vite
   frontend:
@@ -41,13 +41,12 @@ services:
     ports:
       - "${FRONTEND_LOCAL_PORT}:5173"
     environment:
-      # Vite cần biết API ở đâu để gọi (qua trình duyệt máy host)
       - VITE_API_URL=http://localhost:${BACKEND_LOCAL_PORT}/api
     depends_on:
       - backend
     volumes:
-      - ./frontend:/app           # Mount code để Hot Reload hoạt động
-      - /app/node_modules         # Giữ node_modules riêng của container
+      - ./frontend:/app  
+      - /app/node_modules
 
 volumes:
   postgres_data:
