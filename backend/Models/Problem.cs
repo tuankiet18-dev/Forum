@@ -26,7 +26,7 @@ namespace backend.Models
         public string? Category { get; set; } // Algebra, Geometry, Calculus, etc.
 
         [MaxLength(50)]
-        public Difficulty? Difficulty { get; set; } // Easy, Medium, Hard
+        public string? Difficulty { get; set; } // Easy, Medium, Hard
 
         public string? Tags { get; set; } // JSON array: ["linear-algebra", "matrices"]
 
@@ -41,9 +41,5 @@ namespace backend.Models
         public virtual ApplicationUser User { get; set; } = null!;
 
         public virtual ICollection<Solution> Solutions { get; set; } = new List<Solution>();
-    }
-    public enum Difficulty
-    {
-        Easy, Medium, Hard
     }
 }

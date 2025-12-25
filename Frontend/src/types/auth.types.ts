@@ -42,17 +42,3 @@ export interface RegisterRequest {
   confirmPassword?: string;
   fullName?: string;
 }
-
-export interface Problem {
-  id: string
-  title: string
-  content: string
-  author: {
-    username: string
-    reputation: number
-  }
-  tags: string[]
-  solutions: number
-  createdAt: string
-  difficulty: "easy" | "medium" | "hard"
-}
