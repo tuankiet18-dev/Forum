@@ -4,3 +4,5 @@ peft
 fastapi
 uvicorn
 python-multipart
+ipykernel
+langchain-huggingface

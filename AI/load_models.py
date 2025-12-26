@@ -1,6 +1,7 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
 from peft import PeftModel
+from langchain_huggingface import HuggingFacePipeline
 
 """LOAD FINE TUNED MODEL"""
 
@@ -25,8 +26,57 @@ model = AutoModelForCausalLM.from_pretrained(
 # Add adapter too base model
 model = PeftModel.from_pretrained(model, adapter_path)
 
+class ModelLoader:
+    def __init__(
+        self,
+        base_model_name: str = "Qwen/Qwen2.5-0.5B-Instruct",
+        adapter_path: str = None,
+        device: str = "auto",
+        dtype=torch.bfloat16
+    ):
+        self.base_model_name = base_model_name
+        self.adapter_path = adapter_path
+        self.device = device
+        self.dtype = dtype
 
-class LLModel:
+        self.tokenizer = None
+        self.model = None
+       
+    def load(self):
+        """Load Tokenizer and Model. Adapter is optional"""
+        if self.adapter_path:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.adapter_path)
+        else:
+            self.tokenizer = AutoTokenizer.from_pretrained(self.base_model_name)
+        
+        base_model = AutoModelForCausalLM.from_pretrained(
+            self.base_model_name,
+            dtype=self.dtype,
+            device_map=self.device
+        )
+        
+        if self.adapter_path:
+            self.model = PeftModel.from_pretrained(base_model, self.adapter_path)
+        else:
+            self.model = base_model
+
+        return self.model, self.tokenizer
+     
+    def create_llm(self):
+        model, tokenizer = self.load()
+        
+        pipe = pipeline(
+            "text-generation",
+            model=model,
+            tokenizer=tokenizer,
+            max_new_tokens=512,
+            temperature=0.0,
+            do_sample=False,
+        )      
+        
+        return HuggingFacePipeline(pipeline=pipe) 
+
+class TextGenerating:
     def __init__(self, 
                 model: AutoModelForCausalLM = model,
                 tokenizer: AutoTokenizer = tokenizer

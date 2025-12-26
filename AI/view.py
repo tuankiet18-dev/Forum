@@ -1,8 +1,8 @@
-from load_models import LLModel
+from load_models import TextGenerating
 from fastapi import Form, APIRouter
 from pydantic import BaseModel
 
-model = LLModel()
+model = TextGenerating()
 
 router = APIRouter()
 
