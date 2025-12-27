@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using backend.Dtos.Auth;
 using backend.Interfaces.IRepositories;
 using backend.Interfaces.IServices;
 using backend.Models;
+using Backend.Interfaces.IServices;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Formatters.Xml;
+using Microsoft.AspNetCore.Mvc.TagHelpers;
 
 namespace backend.Services
 {
@@ -16,14 +19,17 @@ namespace backend.Services
         private readonly IAuthRepository _authRepository;
         private readonly ITokenService _tokenService;
         private readonly ILogger<AuthService> _logger;
+        private readonly IPhotoService _photoService;
         public AuthService(
             IAuthRepository authRepository,
             ITokenService tokenService,
-            ILogger<AuthService> logger)
+            ILogger<AuthService> logger,
+            IPhotoService photoService)
         {
             _authRepository = authRepository;
             _tokenService = tokenService;
             _logger = logger;
+            _photoService = photoService;
         }
 
         public async Task<(bool Success, AuthResponseDto? Data, List<string> Errors)> RegisterAsync(RegisterDto registerDto)
@@ -190,6 +196,122 @@ namespace backend.Services
             {
                 _logger.LogError(ex, "Error occurred during token revocation");
                 return false;
+            }
+        }
+
+        public async Task<(bool Success, UserInfo? Data, string Error)> GetUserInfoById(string userId)
+        {
+            try
+            {
+                var user = await _authRepository.GetUserByIdAsync(userId);
+                if (user == null)
+                {
+                    return (false, null, "An error occurred during get user infomation");
+                }
+
+                var userInfo = new UserInfo
+                {
+                    UserId = userId,
+                    Username = user.UserName!,
+                    Email = user.Email!,
+                    FullName = user.FullName,
+                    Avatar = user.Avatar,
+                    Reputation = user.Reputation,
+                    CreatedAt = user.CreateAt.ToString("dd/MM/yyyy")
+                };
+
+                _logger.LogInformation("Get information for user {Username}", user.UserName);
+                return (true, userInfo, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during get user infomation");
+                return (false, null, "An error occurred during get user infomation");
+            }
+        }
+
+        public async Task<(bool Success, string? AvatarUrl, string Error)> UpdateUserAvatarAsync(string userId, IFormFile file)
+        {
+            try
+            {
+                var user = await _authRepository.GetUserByIdAsync(userId);
+                if (user == null)
+                {
+                    return (false, null, "User not found");
+                }
+
+                var uploadResult = await _photoService.AddPhotoAsync(file, "forum/avatars", true);
+
+                if (uploadResult.Error != null)
+                {
+                    return (false, null, uploadResult.Error.Message);
+                }
+
+                user.Avatar = uploadResult.SecureUrl.AbsoluteUri;
+
+                // Lưu xuống DB
+                var updated = await _authRepository.UpdateUserAsync(user);
+                if (!updated)
+                {
+                    return (false, null, "Failed to update user avatar in database");
+                }
+
+                _logger.LogInformation("Avatar updated for user {Username}", user.UserName);
+                return (true, user.Avatar, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading avatar");
+                return (false, null, "An error occurred while uploading avatar");
+            }
+        }
+
+        public async Task<(bool Success, string Error)> UpdateProfileAsync(string userId, ProfileEditDto dto)
+        {
+            try
+            {
+                var user = await _authRepository.GetUserByIdAsync(userId);
+                if (user == null) return (false, "User not found");
+
+                if (!string.IsNullOrEmpty(dto.FullName))
+                {
+                    user.FullName = dto.FullName;
+                }
+
+                var updated = await _authRepository.UpdateUserAsync(user);
+                if (!updated) return (false, "Failed to update profile");
+
+                return (true, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating profile");
+                return (false, "An error occurred");
+            }
+        }
+
+        public async Task<(bool Success, string Error)> ChangePasswordAsync(string userId, ChangePasswordDto dto)
+        {
+            try
+            {
+                var user = await _authRepository.GetUserByIdAsync(userId);
+                if (user == null) return (false, "User not found");
+
+                var result = await _authRepository.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+
+                if (!result.Succeeded)
+                {
+                    // Lấy lỗi đầu tiên để trả về cho gọn
+                    var error = result.Errors.FirstOrDefault()?.Description ?? "Failed to change password";
+                    return (false, error);
+                }
+
+                return (true, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password");
+                return (false, "An error occurred");
             }
         }
     }

@@ -7,6 +7,7 @@ using backend.Interfaces.IServices;
 using backend.Models;
 using backend.Repositories;
 using backend.Services;
+using Backend.Interfaces.IServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -121,6 +122,8 @@ builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProblemService, ProblemService>();
+builder.Services.AddScoped<IPhotoService, PhotoService>();
+
 
 
 var app = builder.Build();

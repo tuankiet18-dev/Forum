@@ -18,6 +18,6 @@ namespace backend.Interfaces.IRepositories
         Task<bool> CheckPasswordAsync(ApplicationUser user, string password);
         Task<IList<string>> GetUserRolesAsync(ApplicationUser user);
         Task<bool> AddToRoleAsync(ApplicationUser user, string role);
-
+        Task<IdentityResult> ChangePasswordAsync(ApplicationUser user, string currentPassword, string newPassword);
     }
 }

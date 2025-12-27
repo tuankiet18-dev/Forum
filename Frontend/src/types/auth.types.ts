@@ -42,3 +42,23 @@ export interface RegisterRequest {
   confirmPassword?: string;
   fullName?: string;
 }
+
+export interface UserProfile {
+  userId: string;
+  username: string;
+  email: string;
+  fullName?: string;
+  avatar?: string;
+  reputation: number;
+  createdAt: string;
+}
+
+export interface ProfileEditRequest {
+  fullName: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}

@@ -1,5 +1,5 @@
 import axiosClient from "./axiosClient"
-import type { ApiResponse, AuthResponseDto, LoginRequest, RegisterRequest, TokenDto } from "../types/auth.types"
+import type { ApiResponse, AuthResponseDto, ChangePasswordRequest, LoginRequest, ProfileEditRequest, RegisterRequest, TokenDto, UserProfile } from "../types/auth.types"
 
 const saveTokens = (tokens: TokenDto) => {
   if (typeof window !== "undefined") {
@@ -50,10 +50,43 @@ const register = async (data: RegisterRequest): Promise<ApiResponse<AuthResponse
   }
 }
 
+const getCurrentUser = async (): Promise<UserProfile> => {
+  const response = await axiosClient.get<ApiResponse<UserProfile>>("/auth/me");
+  return response.data.data!;
+}
+
+const uploadAvatar = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append("file", file); // Key "file" phải trùng với tên biến trong UploadAvatarDto (C#)
+
+  const response = await axiosClient.post<ApiResponse<string>>(
+    "/auth/upload-avatar",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data", 
+      },
+    }
+  );
+  return response.data.data!;
+};
+
+const updateProfile = async (data: ProfileEditRequest) => {
+  return await axiosClient.put<ApiResponse<any>>("/auth/edit-profile", data);
+};
+
+const changePassword = async (data: ChangePasswordRequest) => {
+  return await axiosClient.post<ApiResponse<any>>("/auth/change-password", data);
+};
+
 export const authService = {
   saveTokens,
   logout,
   getToken,
   login,
   register,
+  getCurrentUser,
+  uploadAvatar,
+  updateProfile,
+  changePassword,
 }

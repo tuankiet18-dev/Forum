@@ -25,7 +25,17 @@ namespace backend.Dtos.Auth
         public int Reputation { get; set; }
         public List<string> Roles { get; set; } = new List<string>();
         public TokenDto Tokens { get; set; } = null!;
+    }
 
+    public class UserInfo
+    {
+        public string UserId { get; set; } = null!;
+        public string Username { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string? FullName { get; set; }
+        public string? Avatar { get; set; }
+        public int Reputation { get; set; }
+        public string? CreatedAt { get; set; }
     }
 
     public class TokenDto

@@ -71,5 +71,9 @@ namespace backend.Repositories
             return result.Succeeded;
         }
 
+        public async Task<IdentityResult> ChangePasswordAsync(ApplicationUser user, string currentPassword, string newPassword)
+        {
+            return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        }
     }
 }
