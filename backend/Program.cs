@@ -118,11 +118,13 @@ builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection(
 
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
+builder.Services.AddScoped<ISolutionRepository, SolutionRepository>();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProblemService, ProblemService>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
+builder.Services.AddScoped<ISolutionService, SolutionService>();
 
 
 

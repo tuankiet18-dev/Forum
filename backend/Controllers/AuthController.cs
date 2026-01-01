@@ -184,5 +184,17 @@ namespace backend.Controllers
 
             return Ok(ApiResponse<object>.SuccessResponse(null, "Password changed successfully"));
         }
+
+        [HttpGet("profile/{userId}")]
+        public async Task<IActionResult> GetProfileById([FromRoute] string userId)
+        {
+            var (success, data, error) = await _authService.GetUserInfoById(userId);
+            if (!success)
+            {
+                return BadRequest(ApiResponse<object>.ErrorResponse("Get current user failed"));
+            }
+
+            return Ok(ApiResponse<object>.SuccessResponse(data, "User retrieved successfully"));
+        }
     }
 }

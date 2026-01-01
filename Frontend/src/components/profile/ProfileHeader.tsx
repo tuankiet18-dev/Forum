@@ -28,12 +28,14 @@ interface ProfileHeaderProps {
     solutionsCount: number;
     reputation: number;
   };
+  isOwnProfile?: boolean;
 }
 
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   user,
   setUser,
   stats,
+  isOwnProfile = false, // Mặc định là false nếu không truyền
 }) => {
   const [uploading, setUploading] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -76,42 +78,56 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   return (
     <aside className="space-y-8">
       <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+        
         {/* Avatar Section */}
         <div className="mb-6 relative group w-[160px] h-[160px]">
-          <Upload
-            name="avatar"
-            className="block w-full h-full cursor-pointer"
-            showUploadList={false}
-            beforeUpload={beforeUpload}
-            onChange={handleAvatarChange}
-            disabled={uploading}
-          >
-            <div className="w-[160px] h-[160px] rounded-full overflow-hidden border-4 border-background shadow-xl relative cursor-pointer">
+          {isOwnProfile ? (
+            // TRƯỜNG HỢP 1: CHÍNH CHỦ -> Cho phép Upload
+            <Upload
+              name="avatar"
+              className="block w-full h-full cursor-pointer"
+              showUploadList={false}
+              beforeUpload={beforeUpload}
+              onChange={handleAvatarChange}
+              disabled={uploading}
+            >
+              <div className="w-[160px] h-[160px] rounded-full overflow-hidden border-4 border-background shadow-xl relative cursor-pointer">
+                <Avatar
+                  size={152}
+                  src={user?.avatar}
+                  icon={!user?.avatar && <UserOutlined />}
+                  className="flex items-center justify-center bg-primary/10 text-primary text-6xl w-full h-full rounded-full object-cover"
+                />
+                {/* Overlay hover/loading */}
+                <div
+                  className={`absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white transition-opacity duration-300 ${
+                    uploading
+                      ? "opacity-100"
+                      : "opacity-0 group-hover:opacity-100"
+                  }`}
+                >
+                  {uploading ? (
+                    <LoadingOutlined className="text-2xl" />
+                  ) : (
+                    <CameraOutlined className="text-2xl" />
+                  )}
+                  <span className="text-xs mt-1 font-medium">
+                    {uploading ? "Uploading..." : "Change"}
+                  </span>
+                </div>
+              </div>
+            </Upload>
+          ) : (
+            // TRƯỜNG HỢP 2: KHÁCH XEM -> Chỉ hiện ảnh, không click được
+            <div className="w-[160px] h-[160px] rounded-full overflow-hidden border-4 border-background shadow-xl relative">
               <Avatar
                 size={152}
                 src={user?.avatar}
                 icon={!user?.avatar && <UserOutlined />}
                 className="flex items-center justify-center bg-primary/10 text-primary text-6xl w-full h-full rounded-full object-cover"
               />
-              {/* Overlay hover/loading */}
-              <div
-                className={`absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white transition-opacity duration-300 ${
-                  uploading
-                    ? "opacity-100"
-                    : "opacity-0 group-hover:opacity-100"
-                }`}
-              >
-                {uploading ? (
-                  <LoadingOutlined className="text-2xl" />
-                ) : (
-                  <CameraOutlined className="text-2xl" />
-                )}
-                <span className="text-xs mt-1 font-medium">
-                  {uploading ? "Uploading..." : "Change"}
-                </span>
-              </div>
             </div>
-          </Upload>
+          )}
         </div>
 
         {/* User Info */}
@@ -143,22 +159,25 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
           <span>mathforum.io</span>
         </div>
 
-        {/* Nút Edit Profile */}
-        <Button
-          variant="outline"
-          className="w-full mb-8 border-dashed"
-          onClick={() => setIsEditModalOpen(true)}
-        >
-          <EditOutlined className="mr-2" /> Edit Profile
-        </Button>
+        {/* Nút Edit Profile - Chỉ hiện nếu là chính chủ */}
+        {isOwnProfile && (
+          <>
+            <Button
+              variant="outline"
+              className="w-full mb-8 border-dashed"
+              onClick={() => setIsEditModalOpen(true)}
+            >
+              <EditOutlined className="mr-2" /> Edit Profile
+            </Button>
 
-        {/* Thêm Modal vào cuối */}
-        <EditProfileModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          user={user}
-          onUpdateSuccess={handleUpdateSuccess}
-        />
+            <EditProfileModal
+              isOpen={isEditModalOpen}
+              onClose={() => setIsEditModalOpen(false)}
+              user={user}
+              onUpdateSuccess={handleUpdateSuccess}
+            />
+          </>
+        )}
 
         {/* Stats Grid */}
         <div className="w-full grid grid-cols-3 gap-2 border-t border-border pt-6">

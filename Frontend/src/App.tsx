@@ -4,6 +4,7 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import CreateProblemPage from './pages/CreateProblem';
 import ProfilePage from './pages/Profile';
+import ProblemDetailPage from './pages/ProblemDetail';
 
 function App() {
   return (
@@ -13,8 +14,11 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Home />} />
         
-        <Route path="/problems/create" element={<CreateProblemPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/profile/:userId" element={<ProfilePage />} />
+        <Route path="/problems/create" element={<CreateProblemPage />} />
+        <Route path="/problems/:id" element={<ProblemDetailPage />} />
+        
       </Routes>
     </BrowserRouter>
   );

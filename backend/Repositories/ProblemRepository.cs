@@ -130,6 +130,7 @@ namespace backend.Repositories
         {
             return await _context.Problems
                 .Include(p => p.Solutions.Where(s => !s.IsDeleted))
+                .Include(p => p.User)
                 .Where(p => p.UserId == userId && !p.IsDeleted)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();

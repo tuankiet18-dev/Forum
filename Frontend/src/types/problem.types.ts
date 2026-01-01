@@ -1,3 +1,5 @@
+import type { SolutionDto } from "./solution.types";
+
 export interface Problem {
   id: string;
   userId: string;
@@ -15,19 +17,9 @@ export interface Problem {
   updatedAt?: string;
 }
 
-export interface ProblemDetail extends Problem {
+export interface ProblemDetailDto extends Problem {
   userReputation: number;
-  solutions: Solution[];
-}
-
-export interface Solution {
-  id: string;
-  username: string;
-  userAvatar?: string;
-  content: string;
-  isAccepted: boolean;
-  voteCount: number;
-  createdAt: string;
+  solutions: SolutionDto[];
 }
 
 export interface ProblemFilter {
@@ -59,3 +51,4 @@ export interface CreateProblemRequest {
   difficulty?: string;
   tags?: string[];
 }
+

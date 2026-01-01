@@ -1,8 +1,8 @@
 // src/services/problem.service.ts
-import axiosClient from "./axiosClient"; // <-- QUAN TRỌNG: Dùng cái này thay vì axios thường
+import axiosClient from "./axiosClient"; 
 import type {
   Problem,
-  ProblemDetail,
+  ProblemDetailDto,
   ProblemFilter,
   PaginatedResult,
   CreateProblemRequest,
@@ -37,8 +37,8 @@ export const problemService = {
   },
 
   // Lấy chi tiết
-  getById: async (id: string): Promise<ProblemDetail> => {
-    const response = await axiosClient.get<ApiResponse<ProblemDetail>>(
+  getById: async (id: string): Promise<ProblemDetailDto> => {
+    const response = await axiosClient.get<ApiResponse<ProblemDetailDto>>(
       `/problems/${id}`
     );
     return response.data.data!;
@@ -71,6 +71,13 @@ export const problemService = {
   getMyProblems: async (): Promise<Problem[]> => {
     const response = await axiosClient.get<ApiResponse<Problem[]>>(
       "/problems/my-problems"
+    );
+    return response.data.data!;
+  },
+
+  getUserProblems: async (id: string): Promise<Problem[]> => {
+    const response = await axiosClient.get<ApiResponse<Problem[]>>(
+      `/problems/user/${id}`
     );
     return response.data.data!;
   },
