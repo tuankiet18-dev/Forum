@@ -1,31 +1,42 @@
 from langchain_huggingface import HuggingFacePipeline
 from prompt_processing import PromptProcessing
 from tools.tools import ToolExecutor
+from openai import OpenAI
+import os
+import sys
+from pathlib import Path
 
-class Agent:
+file_path = Path("load_models.py")
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+OPEN_ROUTER_API = os.getenv("OPEN_ROUTER_API")
+
+class MyAgent:
     def __init__(self, 
-                llm: HuggingFacePipeline,
                 SYSTEM_PROMPT: str,
                 p_proc: PromptProcessing,
                 executor: ToolExecutor,
+                OPEN_ROUTER_API: str = OPEN_ROUTER_API,
                 ):
-        self.llm = llm
+        self.client = OpenAI(base_url="https://openrouter.ai/api/v1",
+                            api_key=OPEN_ROUTER_API,
+                            )
         self.SYSTEM_PROMPT = SYSTEM_PROMPT
         self.p_proc = p_proc
         self.executor = executor
     
-    def run_agent(self):
-        prompt = self.SYSTEM_PROMPT
+    def run_agent(self, question):
+        messages = [
+        {"role": "system", "content": self.SYSTEM_PROMPT},
+        {"role": "user", "content": question}
+        ]
+        extra_body={"reasoning": {"enabled": True}}
         
-        response = self.llm.invoke(prompt)
-        print("RAW LLM RESPONSE:", response)
+        response = self.client.chat.completions.create(
+            model="deepseek/deepseek-v3.2",
+            messages=messages,
+            extra_body=extra_body
+        )
         
-        call = self.p_proc.parse_llm_output(response)
+        response = response.choices[0].message
         
-        try:
-            self.p_proc.validate_call(call)
-            result = self.executor.execute(call)
-            return result
-        except Exception as e:
-            return f"Tool error: {e}"
-    
+        return response

@@ -1,0 +1,78 @@
+analyze_problem:
+  description: >
+    Analyze user's math problem to identify the problem type,
+    known variables, unknown variables, constraints, and the exact
+    question that needs to be answered. Do not solve the problem.
+  expected_output: >
+    A structured analysis including:
+    - Problem type
+    - Given information
+    - Variables to solve for
+    - Constraints or assumptions
+  agent: problem_analyzer
+
+plan_solution:
+  description: >
+    Decide the correct mathematical approach and required tools.
+    Normalize equations and variables if needed.
+    Do not compute the result.
+  expected_output: >
+    Tool: <tool_name>
+    Action: <action_name>
+    <parameters in YAML format>
+  agent: math_planner
+  context:
+    - analyze_problem
+
+format_input:
+  description: >
+    Format and normalize the planned solution output from Mathematical Solution Planner.
+    Convert the YAML-like output into a properly structured JSON format.
+    Ensure all required parameters are present and correctly formatted for tool execution.
+  expected_output: >
+    {
+      "tool": "<tool_name>",      
+      "action": "<action_name>",   
+      "args": { ... }              
+    }
+  agent: input_formatter
+  context:
+    - plan_solution
+
+execute_solution:
+  description: >
+    Execute the planned solution using the appropriate tool.
+    Output must be a valid tool call if a tool is used.
+  expected_output: >
+    {
+      "tool": "<tool_name>",
+      "action": "<action_name>",
+      "args": { ... },
+      "result": "<computed_result>"  
+    }
+  agent: math_executor
+  context:
+    - format_input
+
+verify_solution:
+  description: >
+    Verify the correctness of the proposed solution by checking
+    calculations, logic, assumptions, and constraints.
+    Correct any errors if found.
+  expected_output: >
+    A verified solution with confirmation of correctness or
+    a corrected version with explanation of errors.
+  agent: solution_verifier
+  context:
+    - execute_solution
+
+explain_solution:
+  description: >
+    Rewrite the verified solution in a clear, well-structured,
+    and learner-friendly format. Use intuitive explanations
+    and clearly highlight the final answer.
+  expected_output: >
+    A polished explanation suitable for a math chatbot response.
+  agent: math_explainer
+  context:
+    - verify_solution

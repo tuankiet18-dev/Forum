@@ -1,7 +1,7 @@
 import math
 
 from sympy import symbols, solve, diff, integrate, simplify
-from sympy import sin, cos, tan, cot, sec, csc, asin, acos, atan, log, exp, sqrt, Abs, floor, ceiling, pi, E, oo, zoo, I, nan, Integer
+from sympy import Symbol, sin, cos, tan, cot, sec, csc, asin, acos, atan, log, exp, sqrt, Abs, floor, ceiling, pi, E, oo, zoo, I, nan, Integer
 from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
 
 import numpy as np
@@ -20,21 +20,13 @@ class Calculator:
             **{k: v for k, v in math.__dict__.items() if not k.startswith("___")}
         }
     
-    class CalculatorTimeout(Exception):
-        pass
-    
-    #Avoid DoS attack
-    def _timeout_handler(self, signum, frame):
-        raise self.CalculatorTimeout("Calculation timed out")
-    
     def evaluate(self, expression: str) -> float:
         """
         Evaluate a numeric math expression safely
         Example: "sqrt(16) + log(10)"
         """
         try:
-            signal.signal(signal.SIGALRM, self._timeout_handler)
-            signal.alarm(self.timeout)
+
             result = eval(
                 expression,
                 {"__builtins__": {}},
@@ -44,14 +36,9 @@ class Calculator:
                 raise ValueError("Result is not a real number")
             return float(result)
         
-        except self.CalculatorTimeout:
-            raise ValueError("Calculator error: Execution exceeded time limit")
         except Exception as e:
             raise ValueError(f"Calculation error: {e}")
-        finally:
-            signal.alarm(0)
         
-
 class EquationSolver:
     def __init__(self):
         self.transformations = (standard_transformations + (implicit_multiplication_application,))
@@ -62,7 +49,17 @@ class EquationSolver:
             'pi': pi, 'E': E, 'oo': oo, 'zoo': zoo, 'I': I, 'nan': nan, 'Integer': Integer
             # Additional functions can be added here if needed, ensuring they are safe mathematical operations.
         }
-
+    def _normalize_equation(self, eq: str) -> str:
+        """
+        Convert 'LHS = RHS' → '(LHS) - (RHS)'
+        """
+        eq = eq.strip()
+        if "=" in eq:
+            if eq.count("=") != 1:
+                raise ValueError("Equation must contain exactly one '='")
+            lhs, rhs = eq.split("=")
+            return f"({lhs})-({rhs})"
+        return eq
     def solve_equation(self, equation: str, var: str):
         """
         Solve equation like: "x**2 - 4"
@@ -70,8 +67,15 @@ class EquationSolver:
         x = symbols(var)
         local_dict = self.safe_locals.copy()
         local_dict[var] = x
+
         try:
-            expr = parse_expr(equation, local_dict=local_dict, transformations=self.transformations, global_dict={})
+            equation = self._normalize_equation(equation)
+            expr = parse_expr(
+                equation,
+                local_dict=local_dict,
+                transformations=self.transformations,
+                global_dict={}
+            )
             return solve(expr, x)
         except Exception as e:
             raise ValueError(f"Error solving equation: {e}")
@@ -82,10 +86,23 @@ class EquationSolver:
         """
         syms = symbols(' '.join(vars))
         local_dict = self.safe_locals.copy()
-        for i, v in enumerate(vars):
-            local_dict[v] = syms[i] if isinstance(syms, tuple) else syms
+
+        if isinstance(syms, tuple):
+            for s in syms:
+                local_dict[str(s)] = s
+        else:
+            local_dict[str(syms)] = syms
+
         try:
-            eqs = [parse_expr(eq, local_dict=local_dict, transformations=self.transformations, global_dict={}) for eq in equations]
+            eqs = [
+                parse_expr(
+                    self._normalize_equation(eq),
+                    local_dict=local_dict,
+                    transformations=self.transformations,
+                    global_dict={}
+                )
+                for eq in equations
+            ]
             return solve(eqs, syms)
         except Exception as e:
             raise ValueError(f"Error solving system: {e}")
@@ -97,7 +114,7 @@ class SymbolicMath:
             'sin': sin, 'cos': cos, 'tan': tan, 'cot': cot, 'sec': sec, 'csc': csc,
             'asin': asin, 'acos': acos, 'atan': atan,
             'log': log, 'exp': exp, 'sqrt': sqrt, 'abs': Abs, 'floor': floor, 'ceiling': ceiling,
-            'pi': pi, 'E': E, 'oo': oo, 'zoo': zoo, 'I': I, 'nan': nan, 'Integer': Integer
+            'pi': pi, 'E': E, 'oo': oo, 'zoo': zoo, 'I': I, 'nan': nan, 'Integer': Integer, 'Symbol': Symbol,
             # Additional functions can be added here if needed, ensuring they are safe mathematical operations.
         }
 
