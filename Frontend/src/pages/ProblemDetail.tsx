@@ -11,7 +11,7 @@ import { LeftOutlined } from "@ant-design/icons";
 import type { ProblemDetailDto } from "../types/problem.types";
 import type { UserProfile } from "../types/auth.types";
 
-// Import các component con đã tách
+// Import các component con
 import { ProblemHeader } from "../components/problem-detail/ProblemHeader";
 import { ProblemContent } from "../components/problem-detail/ProblemContent";
 import { SolutionList } from "../components/problem-detail/SolutionList";
@@ -27,27 +27,39 @@ export default function ProblemDetailPage() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // 1. Fetch dữ liệu
+  // Lấy thông tin user hiện tại
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUser = async () => {
+        try {
+            const user = await authService.getCurrentUser();
+            setCurrentUser(user);
+        } catch {
+            // Chưa login cũng không sao
+        }
+    };
+    fetchUser();
+  }, []);
+
+  // Hàm load lại dữ liệu bài toán (dùng khi Post, Edit, Delete solution)
+  const fetchProblemData = async () => {
+      if (!id) return;
       try {
-        if (!id) return;
-        const [problemData] = await Promise.all([
-          problemService.getById(id),
-          authService.getCurrentUser().then((res) => setCurrentUser(res)).catch(() => setCurrentUser(null)),
-        ]);
+        const problemData = await problemService.getById(id);
         setProblem(problemData);
       } catch (error) {
-        console.error(error);
-        message.error("Failed to load problem details.");
-      } finally {
-        setLoading(false);
+        console.error("Failed to refresh problem");
       }
-    };
-    fetchData();
+  };
+
+  useEffect(() => {
+    const init = async () => {
+        setLoading(true);
+        await fetchProblemData();
+        setLoading(false);
+    }
+    init();
   }, [id]);
 
-  // 2. Logic Submit Solution
   const handlePostSolution = async (content: string, steps: string[]) => {
     if (!content.trim()) {
       message.warning("Please enter solution content.");
@@ -66,9 +78,7 @@ export default function ProblemDetailPage() {
       });
 
       message.success("Solution posted successfully!");
-      // Reload lại problem để hiện solution mới
-      const updatedProblem = await problemService.getById(problem.id);
-      setProblem(updatedProblem);
+      await fetchProblemData(); // Reload lại data
     } catch (error: any) {
       message.error("Failed to post solution.");
     } finally {
@@ -76,15 +86,11 @@ export default function ProblemDetailPage() {
     }
   };
 
-  // 3. Logic Accept Solution
   const handleAcceptSolution = async (solutionId: string) => {
     try {
       await solutionService.accept(solutionId);
       message.success("Solution accepted successfully!");
-      if (problem) {
-        const updatedProblem = await problemService.getById(problem.id);
-        setProblem(updatedProblem);
-      }
+      await fetchProblemData(); // Reload lại data
     } catch (error) {
       message.error("Failed to accept solution.");
     }
@@ -104,25 +110,22 @@ export default function ProblemDetailPage() {
           </Button>
         </div>
 
-        {/* --- Header Component --- */}
         <ProblemHeader problem={problem} />
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10">
           
-          {/* CỘT TRÁI */}
           <div>
-            {/* --- Content Component --- */}
             <ProblemContent content={problem.content} tags={problem.tags} />
 
-            {/* --- Solutions List Component --- */}
+            {/* --- TRUYỀN THÊM onRefreshRequest --- */}
             <SolutionList 
               solutions={problem.solutions} 
               currentUserId={currentUser?.userId}
               problemAuthorId={problem.userId}
               onAcceptSolution={handleAcceptSolution}
+              onRefreshRequest={fetchProblemData} 
             />
 
-            {/* --- Form Component --- */}
             <SolutionForm 
               currentUser={currentUser}
               onSubmit={handlePostSolution}
@@ -130,7 +133,6 @@ export default function ProblemDetailPage() {
             />
           </div>
 
-          {/* CỘT PHẢI (SIDEBAR) */}
           <aside>
             <AuthorSidebar 
                author={{

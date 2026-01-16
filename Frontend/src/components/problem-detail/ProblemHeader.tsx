@@ -3,6 +3,7 @@ import {
   ClockCircleOutlined, EyeOutlined, MessageOutlined 
 } from "@ant-design/icons";
 import type { ProblemDetailDto } from "../../types/problem.types";
+import { LatexRenderer } from "../problem/LatexRenderer";
 
 interface ProblemHeaderProps {
   problem: ProblemDetailDto;
@@ -13,7 +14,7 @@ export const ProblemHeader: React.FC<ProblemHeaderProps> = ({ problem }) => {
     <div className="mb-8 border-b border-border pb-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
         <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-balance flex-1">
-          {problem.title}
+          <LatexRenderer content={problem.title} />
         </h1>
         <span
           className={`px-4 py-1.5 rounded-full border text-sm font-bold uppercase tracking-wider ${

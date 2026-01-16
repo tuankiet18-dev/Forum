@@ -21,6 +21,6 @@ namespace backend.Dtos.Problem
         public string? Difficulty { get; set; }
 
         public List<string>? Tags { get; set; }
-
+        public string? Level { get; set; }
     }
 }

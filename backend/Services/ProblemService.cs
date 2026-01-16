@@ -35,6 +35,7 @@ namespace backend.Services
                     Content = dto.Content,
                     Category = dto.Category,
                     Difficulty = dto.Difficulty,
+                    Level = dto.Level,
                     Tags = dto.Tags != null && dto.Tags.Any() ? JsonSerializer.Serialize(dto.Tags) : null,
                     CreatedAt = DateTime.UtcNow
                 };
@@ -42,8 +43,7 @@ namespace backend.Services
                 var createdProblem = await _problemRepository.CreateAsync(problem);
                 var problemWithUser = await _problemRepository.GetByIdAsync(createdProblem.Id);
                 var result = MapToProblemDto(problemWithUser!);
-                _logger.LogInformation("Problem {ProblemId} created by user {UserId}",
-                createdProblem.Id, userId);
+                _logger.LogInformation("Problem {ProblemId} created by user {UserId}", createdProblem.Id, userId);
 
                 return (true, result, string.Empty);
             }
@@ -165,6 +165,9 @@ namespace backend.Services
                 if (dto.Difficulty != null)
                     problem.Difficulty = dto.Difficulty;
 
+                if(dto.Level != null) 
+                    problem.Level = dto.Level;
+
                 if (dto.Tags != null)
                     problem.Tags = dto.Tags.Any()
                         ? JsonSerializer.Serialize(dto.Tags)
@@ -197,6 +200,7 @@ namespace backend.Services
                 Content = problem.Content,
                 Category = problem.Category,
                 Difficulty = problem.Difficulty,
+                Level = problem.Level,
                 Tags = !string.IsNullOrWhiteSpace(problem.Tags)
                     ? JsonSerializer.Deserialize<List<string>>(problem.Tags) ?? new List<string>()
                     : new List<string>(),
@@ -221,6 +225,7 @@ namespace backend.Services
                 Content = problem.Content,
                 Category = problem.Category,
                 Difficulty = problem.Difficulty,
+                Level = problem.Level,
                 Tags = !string.IsNullOrWhiteSpace(problem.Tags)
                     ? JsonSerializer.Deserialize<List<string>>(problem.Tags) ?? new List<string>()
                     : new List<string>(),

@@ -7,6 +7,7 @@ interface SolutionListProps {
   currentUserId?: string;
   problemAuthorId: string;
   onAcceptSolution: (id: string) => void;
+  onRefreshRequest: () => void;
 }
 
 export const SolutionList: React.FC<SolutionListProps> = ({
@@ -14,6 +15,7 @@ export const SolutionList: React.FC<SolutionListProps> = ({
   currentUserId,
   problemAuthorId,
   onAcceptSolution,
+  onRefreshRequest
 }) => {
   return (
     <>
@@ -31,6 +33,7 @@ export const SolutionList: React.FC<SolutionListProps> = ({
               currentUserId={currentUserId}
               isProblemAuthor={currentUserId === problemAuthorId}
               onAccept={onAcceptSolution}
+              onDataChange={onRefreshRequest}
             />
           ))
         ) : (

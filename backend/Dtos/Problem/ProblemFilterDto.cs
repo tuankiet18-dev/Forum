@@ -9,6 +9,7 @@ namespace backend.Dtos.Problem
     {
         public string? Category { get; set; }
         public string? Difficulty { get; set; }
+        public string? Level { get; set; }
         public string? SearchTerm { get; set; }
         public string? Tag { get; set; }
         public bool? HasAcceptedSolution { get; set; }

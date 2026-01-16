@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Input, Space } from "antd";
-import { Button } from "../ui/Button"; // Custom Button
+import { Input, message, Space } from "antd";
+import { Button } from "../ui/Button"; 
 import { 
   PlusOutlined, 
   MinusCircleOutlined, 
@@ -9,8 +9,8 @@ import {
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import type { UserProfile } from "../../types/auth.types";
-
-const { TextArea } = Input;
+// Import LatexEditor (đảm bảo đường dẫn đúng tới file bạn đã có)
+import { LatexEditor } from "../problem/LatexEditor"; 
 
 interface SolutionFormProps {
   currentUser: UserProfile | null;
@@ -23,9 +23,7 @@ export const SolutionForm: React.FC<SolutionFormProps> = ({
   onSubmit,
   submitting,
 }) => {
-  // State quản lý việc ẩn/hiện form
   const [isExpanded, setIsExpanded] = useState(false);
-  
   const [content, setContent] = useState("");
   const [steps, setSteps] = useState<string[]>([""]);
 
@@ -38,14 +36,16 @@ export const SolutionForm: React.FC<SolutionFormProps> = ({
   };
 
   const handleSubmit = async () => {
+    if (content.trim().length < 10) {
+      message.error("Solution content must be at least 10 characters long.");
+      return;
+    }
     await onSubmit(content, steps);
-    // Reset form và đóng lại sau khi submit thành công
     setContent("");
     setSteps([""]);
     setIsExpanded(false);
   };
 
-  // --- TRẠNG THÁI 1: FORM ĐANG ĐÓNG (Chỉ hiện nút bấm) ---
   if (!isExpanded) {
     return (
       <div className="mt-8 mb-12">
@@ -60,9 +60,9 @@ export const SolutionForm: React.FC<SolutionFormProps> = ({
     );
   }
 
-  // --- TRẠNG THÁI 2: FORM MỞ NHƯNG CHƯA LOGIN ---
   if (!currentUser) {
     return (
+      // ... Giữ nguyên phần chưa login ...
       <div className="bg-card border border-border rounded-xl p-6 shadow-sm mt-8 mb-12 animate-in fade-in slide-in-from-bottom-2">
         <div className="flex justify-between items-center mb-4">
             <h3 className="text-xl font-bold">Your Solution</h3>
@@ -83,7 +83,6 @@ export const SolutionForm: React.FC<SolutionFormProps> = ({
     );
   }
 
-  // --- TRẠNG THÁI 3: FORM MỞ VÀ ĐÃ LOGIN (Nhập liệu) ---
   return (
     <div className="bg-card border border-border rounded-xl p-6 shadow-sm mt-8 mb-12 animate-in fade-in slide-in-from-bottom-2">
       <div className="flex justify-between items-center mb-6 border-b border-border pb-4">
@@ -101,15 +100,16 @@ export const SolutionForm: React.FC<SolutionFormProps> = ({
       </div>
       
       <div className="mb-5">
-        <label className="block text-sm font-medium mb-2 text-muted-foreground">
-          Solution Content <span className="text-red-500">*</span>
-        </label>
-        <TextArea
-          className="w-full p-4 rounded-lg bg-background border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-y text-foreground placeholder:text-muted-foreground/50"
-          placeholder="Write your detailed solution here. Markdown and LaTeX are supported..."
+        <LatexEditor
+          label="Solution Content"
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={setContent}
+          placeholder="Write your detailed solution here. Use LaTeX: $x^2 + y^2 = z^2$"
+          required
           rows={8}
+          showHelp={true}
+          minChars={10}    
+          maxChars={10000}
         />
       </div>
 
@@ -121,8 +121,10 @@ export const SolutionForm: React.FC<SolutionFormProps> = ({
             <Space direction="vertical" className="w-full" size="middle">
             {steps.map((step, index) => (
                 <div key={index} className="flex gap-2">
+                {/* Các bước này vẫn dùng Input thường cho gọn, 
+                    nhưng người dùng vẫn có thể gõ LaTeX (vd: $x$) và sẽ được render ở SolutionItem */}
                 <Input
-                    placeholder={`Step ${index + 1}`}
+                    placeholder={`Step ${index + 1} (LaTeX supported: $...$)`}
                     value={step}
                     onChange={(e) => handleStepChange(index, e.target.value)}
                     className="flex-1 h-10"

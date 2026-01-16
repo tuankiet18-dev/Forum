@@ -23,6 +23,6 @@ namespace backend.Dtos.Problem
         public string? Difficulty { get; set; } // Easy, Medium, Hard
 
         public List<string>? Tags { get; set; } // ["linear-algebra", "matrices"]
-
+        public string? Level { get; set; }
     }
 }

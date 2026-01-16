@@ -25,3 +25,8 @@ export interface VoteSolutionRequest {
   solutionId: string;
   voteType: number; // 1 hoặc -1
 }
+
+export interface UpdateSolutionRequest {
+  content: string;
+  steps?: string[];
+}

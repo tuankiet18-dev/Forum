@@ -9,6 +9,7 @@ export interface Problem {
   content: string;
   category?: string;
   difficulty?: string;
+  level?: string;
   tags: string[];
   viewCount: number;
   solutionCount: number;
@@ -26,6 +27,7 @@ export interface ProblemFilter {
   category?: string;
   difficulty?: string;
   searchTerm?: string;
+  level?: string;
   tag?: string;
   hasAcceptedSolution?: boolean;
   sortBy?: string;
@@ -49,6 +51,7 @@ export interface CreateProblemRequest {
   content: string;
   category?: string;
   difficulty?: string;
+  level?: string;
   tags?: string[];
 }
 

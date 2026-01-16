@@ -1,6 +1,7 @@
 import React from "react";
 import { Tag } from "antd";
 import { TagOutlined } from "@ant-design/icons";
+import { LatexRenderer } from "../problem/LatexRenderer";
 
 interface ProblemContentProps {
   content: string;
@@ -12,7 +13,7 @@ export const ProblemContent: React.FC<ProblemContentProps> = ({ content, tags })
     <>
       <div className="bg-card/30 p-6 md:p-8 rounded-2xl border border-border mb-8 shadow-sm">
         <div className="prose prose-invert prose-lg max-w-none text-foreground leading-relaxed whitespace-pre-wrap">
-          {content}
+          <LatexRenderer content={content} />
         </div>
       </div>
 

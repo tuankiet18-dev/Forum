@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Quic;
 using System.Threading.Tasks;
 using backend.Data;
 using backend.Dtos.Problem;
@@ -24,7 +25,6 @@ namespace backend.Repositories
             await _context.Problems.AddAsync(problem);
             await _context.SaveChangesAsync();
             return problem;
-
         }
 
         public async Task<bool> DeleteAsync(Guid id)
@@ -35,7 +35,6 @@ namespace backend.Repositories
             problem.IsDeleted = true;
             await _context.SaveChangesAsync();
             return true;
-
         }
 
         public async Task<(List<Problem> Items, int TotalCount)> GetAllAsync(ProblemFilterDto filter)
@@ -55,6 +54,11 @@ namespace backend.Repositories
             if (!string.IsNullOrWhiteSpace(filter.Difficulty))
             {
                 query = query.Where(p => p.Difficulty == filter.Difficulty);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Level))
+            {
+                query = query.Where(p => p.Level == filter.Level);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
@@ -152,7 +156,6 @@ namespace backend.Repositories
             _context.Problems.Update(problem);
             await _context.SaveChangesAsync();
             return problem;
-
         }
     }
 }

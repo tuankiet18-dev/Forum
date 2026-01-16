@@ -27,6 +27,9 @@ namespace backend.Models
 
         [MaxLength(50)]
         public string? Difficulty { get; set; } // Easy, Medium, Hard
+        
+        [MaxLength(100)]
+        public string? Level { get; set; } // Education level
 
         public string? Tags { get; set; } // JSON array: ["linear-algebra", "matrices"]
 

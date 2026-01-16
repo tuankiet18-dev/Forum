@@ -6,30 +6,9 @@ import type {
   LoginRequest,
   ProfileEditRequest,
   RegisterRequest,
-  TokenDto,
   UserProfile,
 } from "../types/auth.types";
-
-const saveTokens = (tokens: TokenDto) => {
-  if (typeof window !== "undefined") {
-    localStorage.setItem("accessToken", tokens.accessToken);
-    localStorage.setItem("refreshToken", tokens.refreshToken);
-  }
-};
-
-const logout = () => {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-  }
-};
-
-const getToken = () => {
-  if (typeof window !== "undefined") {
-    return localStorage.getItem("accessToken");
-  }
-  return null;
-};
+import { setTokens, clearTokens, getAccessToken } from "../utils/token.utils";
 
 const login = async (
   data: LoginRequest
@@ -42,7 +21,7 @@ const login = async (
     const result = response.data;
 
     if (result.success && result.data) {
-      saveTokens(result.data.tokens);
+      setTokens(result.data.tokens);
     }
     return result;
   } catch (error: any) {
@@ -63,13 +42,28 @@ const register = async (
     const result = response.data;
 
     if (result.success && result.data) {
-      saveTokens(result.data.tokens);
+      setTokens(result.data.tokens);
     }
     return result;
   } catch (error: any) {
     return (
       error.response?.data || { success: false, message: "Connection error" }
     );
+  }
+};
+
+// Hàm Logout: Gọi API để hủy token trên server, sau đó xóa ở client
+const logout = async () => {
+  try {
+    // Gọi API logout (cần AccessToken, axiosClient sẽ tự gắn vào header)
+    await axiosClient.post("/auth/logout");
+  } catch (error) {
+    console.error("Logout API call failed", error);
+  } finally {
+    // Luôn xóa token ở client dù API thành công hay thất bại
+    clearTokens();
+    // Có thể reload trang hoặc redirect nếu cần thiết
+    // window.location.href = '/login'; 
   }
 };
 
@@ -80,7 +74,7 @@ const getCurrentUser = async (): Promise<UserProfile> => {
 
 const uploadAvatar = async (file: File): Promise<string> => {
   const formData = new FormData();
-  formData.append("file", file); // Key "file" phải trùng với tên biến trong UploadAvatarDto (C#)
+  formData.append("file", file);
 
   const response = await axiosClient.post<ApiResponse<string>>(
     "/auth/upload-avatar",
@@ -109,15 +103,15 @@ const getProfile = async (id: string) => {
   return await axiosClient.get<ApiResponse<UserProfile>>(`auth/profile/${id}`);
 };
 
+// SỬA LẠI PHẦN EXPORT CHO ĐÚNG
 export const authService = {
-  saveTokens,
-  logout,
-  getToken,
-  login,
-  register,
+  login,            // Map đúng hàm login
+  register,         // Map đúng hàm register
+  logout,           // Thêm hàm logout
   getCurrentUser,
   uploadAvatar,
   updateProfile,
   changePassword,
   getProfile,
+  getToken: getAccessToken, // Helper để lấy token nếu cần
 };

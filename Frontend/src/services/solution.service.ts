@@ -4,6 +4,7 @@ import type {
   SolutionDto,
   CreateSolutionRequest,
   VoteSolutionRequest,
+  UpdateSolutionRequest
 } from "../types/solution.types";
 
 const create = async (data: CreateSolutionRequest) => {
@@ -36,11 +37,21 @@ const getUserSolutions = async (userId: string) => {
   return await axiosClient.get<ApiResponse<SolutionDto[]>>(`/solutions/user/${userId}`);
 }
 
+const update = async (id: string, data: UpdateSolutionRequest) => {
+  return await axiosClient.put<ApiResponse<SolutionDto>>(`/solutions/${id}`, data);
+};
+
+const remove = async (id: string) => {
+  return await axiosClient.delete<ApiResponse<any>>(`/solutions/${id}`);
+};
+
 export const solutionService = {
   create,
   accept,
   vote,
   getById,
   getMySolutions,
-  getUserSolutions
+  getUserSolutions,
+  update,
+  remove
 };

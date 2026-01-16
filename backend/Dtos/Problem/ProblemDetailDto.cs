@@ -17,6 +17,7 @@ namespace backend.Dtos.Problem
         public string Content { get; set; } = null!;
         public string? Category { get; set; }
         public string? Difficulty { get; set; }
+        public string? Level { get; set; }
         public List<string> Tags { get; set; } = new List<string>();
         public int ViewCount { get; set; }
         public DateTime CreatedAt { get; set; }
