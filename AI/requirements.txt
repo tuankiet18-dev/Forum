@@ -6,3 +6,13 @@ uvicorn
 python-multipart
 ipykernel
 langchain-huggingface
+langchain
+deepagents
+openai
+crewai_tools
+litellm
+PyYAML
+crewai
+crewai[google-genai]
+pytest
+ollama
